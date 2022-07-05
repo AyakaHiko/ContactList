@@ -93,13 +93,13 @@ namespace ContactList
             _createFile(path);
             _delete();
 
-            XmlNode root = xmlDoc.DocumentElement;
+            XmlNode root = _xmlDoc.DocumentElement;
 
             foreach (var contact in _contacts)
             {
                 root?.AppendChild(_createNode(contact));
             }
-            xmlDoc.Save(path);
+            _xmlDoc.Save(path);
 
         }
 
@@ -111,7 +111,7 @@ namespace ContactList
 
             _contacts.Clear();
             _createFile(fileDialog.FileName);
-            foreach (XmlNode contact in xmlDoc.GetElementsByTagName("Contact"))
+            foreach (XmlNode contact in _xmlDoc.GetElementsByTagName("Contact"))
             {
                 if (!contact.HasChildNodes) continue;
                 Contact newContact = new Contact();
@@ -131,12 +131,12 @@ namespace ContactList
             }
         }
 
-        private XmlDocument xmlDoc = new XmlDocument();
+        private readonly XmlDocument _xmlDoc = new XmlDocument();
         private XmlNode _createNode(Contact contact)
         {
-            XmlNode root = xmlDoc.CreateElement("Contact");
-            XmlNode name = xmlDoc.CreateElement("Name");
-            XmlNode num = xmlDoc.CreateElement("Number");
+            XmlNode root = _xmlDoc.CreateElement("Contact");
+            XmlNode name = _xmlDoc.CreateElement("Name");
+            XmlNode num = _xmlDoc.CreateElement("Number");
             name.InnerText = contact.Name;
             root.AppendChild(name);
             num.InnerText = contact.PhoneNum;
@@ -149,18 +149,18 @@ namespace ContactList
             if (!File.Exists(path))
             {
                 Directory.CreateDirectory(path.Substring(0, path.Length - System.IO.Path.GetFileName(path).Length));
-                xmlDoc.AppendChild(xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
-                xmlDoc.AppendChild(xmlDoc.CreateElement("Contacts"));
-                xmlDoc.Save(path);
+                _xmlDoc.AppendChild(_xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                _xmlDoc.AppendChild(_xmlDoc.CreateElement("Contacts"));
+                _xmlDoc.Save(path);
             }
             else
             {
-                xmlDoc.Load(path);
+                _xmlDoc.Load(path);
             }
         }
         private void _delete()
         {
-            XmlNode root = xmlDoc.DocumentElement;
+            XmlNode root = _xmlDoc.DocumentElement;
 
             if (root != null)
             {
