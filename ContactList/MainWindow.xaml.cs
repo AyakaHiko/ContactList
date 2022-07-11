@@ -24,20 +24,16 @@ namespace ContactList
         public MainWindow()
         {
             _contacts = new ObservableCollection<Contact>();
-
+            
             InitializeComponent();
 
             ContactListbox.ItemsSource = _contacts;
-
         }
 
         private void AddNew_OnClick(object sender, RoutedEventArgs e)
         {
-            foreach (var box in EditPanel.Children.OfType<TextBox>())
-            {
-                if (string.IsNullOrEmpty(box.Text)) return;
-            }
             Contact contact = _newContact();
+            if(contact == null) return;
             if (!_contacts.Contains(contact))
                 _contacts.Add(contact);
             ContactListbox.UnselectAll();
@@ -46,8 +42,12 @@ namespace ContactList
         private Contact _newContact()
         {
             Contact contact = new Contact();
+            if (string.IsNullOrEmpty(ContactName.Text) || string.IsNullOrEmpty(ContactNumber.Text)) return null;
             contact.Name = ContactName.Text;
-            contact.PhoneNum = ContactNumber.Text;
+            contact.Number = ContactNumber.Text;
+            contact.Email = ContactEmail.Text;
+            contact.Address = ContactAddress.Text;
+            contact.Country = ContactCountry.Text;
             return contact;
         }
 
@@ -72,6 +72,7 @@ namespace ContactList
                     var b = textBox.GetBindingExpression(TextBox.TextProperty);
                     b.UpdateSource();
                 }
+                
             }
             ContactListbox.UnselectAll();
 
@@ -97,52 +98,76 @@ namespace ContactList
 
             foreach (var contact in _contacts)
             {
-                root?.AppendChild(_createNode(contact));
+                var c = _getXmlNode(contact);
+                root?.AppendChild(c);
             }
             _xmlDoc.Save(path);
 
         }
 
+        private XmlNode _getXmlNode(Contact contact)
+        {
+            XmlNode root = _xmlDoc.CreateElement("Contact");
+            XmlNode name = _xmlDoc.CreateElement("Name");
+            XmlNode num = _xmlDoc.CreateElement("Number");
+            XmlNode email = _xmlDoc.CreateElement("Email");
+            XmlNode address = _xmlDoc.CreateElement("Address");
+            XmlNode country = _xmlDoc.CreateElement("Country");
+            name.InnerText = contact.Name;
+            num.InnerText = contact.Number;
+            email.InnerText = contact.Email;
+            address.InnerText = contact.Address;
+            country.InnerText = contact.Country;
+            root.AppendChild(name);
+            root.AppendChild(num);
+            root.AppendChild(email);
+            root.AppendChild(address);
+            root.AppendChild(country);
+            return root;
+        }
+
+
+        private Contact _loadFromNode(XmlNode node)
+        {
+            node = node.FirstChild;
+            if(node == null) return null;
+            Contact contact = new Contact();
+            do
+            {
+                switch (node.Name)
+                {
+                    case "Name":
+                        contact.Name = node.InnerText; break;
+                    case "Number":
+                        contact.Number = node.InnerText; break;
+                    case "Email":
+                        contact.Email = node.InnerText; break;
+                    case "Address":
+                        contact.Address = node.InnerText; break;
+                    case "Country":
+                        contact.Country = node.InnerText; break;
+                }
+                node = node.NextSibling;
+            } while (node != null);
+
+            return contact;
+
+        }
         private void MenuOpen_OnClick(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = "Xml Doc|*.xml";
             if (fileDialog.ShowDialog() != true) return;
-
             _contacts.Clear();
             _createFile(fileDialog.FileName);
             foreach (XmlNode contact in _xmlDoc.GetElementsByTagName("Contact"))
             {
                 if (!contact.HasChildNodes) continue;
-                Contact newContact = new Contact();
-                XmlNode item = contact.FirstChild;
-                do
-                {
-                    switch (item.Name)
-                    {
-                        case "Name":
-                            newContact.Name = item.InnerText; break;
-                        case "Number":
-                            newContact.PhoneNum = item.InnerText; break;
-                    }
-                    item = item.NextSibling;
-                } while (item != null);
-                _contacts.Add(newContact);
+               _contacts.Add(_loadFromNode(contact));
             }
         }
 
         private readonly XmlDocument _xmlDoc = new XmlDocument();
-        private XmlNode _createNode(Contact contact)
-        {
-            XmlNode root = _xmlDoc.CreateElement("Contact");
-            XmlNode name = _xmlDoc.CreateElement("Name");
-            XmlNode num = _xmlDoc.CreateElement("Number");
-            name.InnerText = contact.Name;
-            root.AppendChild(name);
-            num.InnerText = contact.PhoneNum;
-            root.AppendChild(num);
-            return root;
-        }
 
         private void _createFile(string path)
         {
@@ -168,5 +193,9 @@ namespace ContactList
             }
         }
 
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ContactListbox.UnselectAll();
+        }
     }
 }

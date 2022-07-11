@@ -65,12 +65,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Contact.cs" />
+    <Compile Include="Converter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NameRules.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

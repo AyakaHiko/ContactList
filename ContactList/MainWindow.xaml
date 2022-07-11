@@ -3,57 +3,155 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-
         xmlns:local="clr-namespace:ContactList"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="250" MinWidth="450"
-        Height="300" Width="500"
+        Title="MainWindow" MinHeight="550" MinWidth="500"
+        Height="300" Width="500" MouseDown="Window_MouseDown"
 >
+    <Window.Resources>
+        <Style x:Key="DefaultButtons" TargetType="Button">
+            <Setter Property="Margin" Value="10 20"/>
+        </Style>
+    </Window.Resources>
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto" MinWidth="300"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Menu Panel.ZIndex="5" >
-                <MenuItem Header="File">
-                    <MenuItem Header="Open" Click="MenuOpen_OnClick"/>
-                    <MenuItem Header="Save" Click="MenuSave_OnClick"/>
-                </MenuItem>
-            </Menu>
-            <ListBox Grid.Row="1" x:Name="ContactListbox" DisplayMemberPath="Name" SelectionMode="Single"/>
+        <Menu Panel.ZIndex="5" Grid.ColumnSpan="2" >
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="MenuOpen_OnClick"/>
+                <MenuItem Header="Save" Click="MenuSave_OnClick"/>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+
+            <ListBox Grid.Row="1" x:Name="ContactListbox"  SelectionMode="Single" HorizontalContentAlignment="Stretch">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="OverridesDefaultStyle" Value="False"></Setter>
+
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="OrangeRed"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="AntiqueWhite" CornerRadius="10" Padding="10" x:Name="Border">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition MinHeight="50"/>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.RowSpan="2">
+                                        <Ellipse Fill="Coral" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+                                        <TextBlock Text="{Binding Path=Initials}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="AliceBlue"/>
+                                    </Grid>
+                                    <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name}" Grid.Column="1" VerticalAlignment="Center" Margin="15 0" />
+                                    <TextBlock Text="{Binding Path=Number}" Grid.Row="1" Grid.Column="2"  Margin="15 0"/>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Path=Email, StringFormat={}Email: {0}}" Grid.Row="2">
+                                    <TextBlock.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Email}" Value="{x:Static s:String.Empty}">
+                                                    <Setter Property="TextBlock.Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Path=Address, StringFormat={}Address: {0}}" Grid.Row="3" >
+                                    <TextBlock.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Address}" Value="{x:Static s:String.Empty}">
+                                                    <Setter Property="TextBlock.Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Path=Country, StringFormat={}Country: {0}}" Grid.Row="4" >
+                                    <TextBlock.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Country}" Value="{x:Static s:String.Empty}">
+                                                    <Setter Property="TextBlock.Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
         </Grid>
 
-        <Grid Column="1">
+        <Grid Column="1" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="150"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="1">
                 <Grid.Resources>
-                    <Style TargetType="Button">
-                        <Setter Property="Margin" Value="10 20"></Setter>
+                    <Style TargetType="Button" x:Key="LockIfUnselected" BasedOn="{StaticResource DefaultButtons}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ContactListbox, Path=SelectedIndex}" Value="-1">
+                                <Setter Property="Button.IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style TargetType="Button" x:Key="LockIfSelected" BasedOn="{StaticResource DefaultButtons}">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ContactListbox, Path=SelectedIndex}" Value="-1">
+                                <Setter Property="Button.IsEnabled" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
 
-                <Button Content="Save" Click="Save_OnClick"/>
-                <Button Grid.Column="1" Content="Delete" Click ="Delete_OnClick"/>
-                <Button Grid.ColumnSpan="2" Grid.Row="1" Content="Add New" Click="AddNew_OnClick"/>
+
+                <!--<Button Content="Save" Click="Save_OnClick" Style="{StaticResource LockIfUnselected}"/>-->
+                <Button Grid.Row="1" Content="Delete" Click ="Delete_OnClick" Style ="{StaticResource LockIfUnselected}"/>
+                <Button  Content="Add New" Click="AddNew_OnClick" Style="{StaticResource LockIfSelected}"/>
             </Grid>
             <UniformGrid x:Name="EditPanel" Grid.Column="1" Columns="2" DataContext="{Binding ElementName =ContactListbox, Path =SelectedItem}">
                 <UniformGrid.Resources>
@@ -69,14 +167,37 @@
                 </UniformGrid.Resources>
 
                 <TextBlock Text="Name"/>
-                <TextBox x:Name="ContactName" Text="{Binding Name, UpdateSourceTrigger=Explicit}"/>
+                <TextBox x:Name="ContactName">
+                    <TextBox.Text>
+                        <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:NameRules/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
 
 
                 <TextBlock Text="Number"/>
-                <TextBox x:Name="ContactNumber" Text="{Binding PhoneNum, UpdateSourceTrigger=Explicit}" 
-                         PreviewTextInput ="ContactNumber_OnPreviewTextInput"
-                         
-                         />
+                <TextBox x:Name="ContactNumber"
+                         PreviewTextInput ="ContactNumber_OnPreviewTextInput">
+                    <TextBox.Text>
+                        <Binding Path="Number" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <local:NumberRules/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
+                <TextBlock Text="Email"/>
+                <TextBox x:Name="ContactEmail" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <TextBlock Text="Country"/>
+                <TextBox x:Name="ContactCountry" Text="{Binding Country, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <TextBlock Text="Address"/>
+                <TextBox x:Name="ContactAddress"  Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
             </UniformGrid>
         </Grid>
 
